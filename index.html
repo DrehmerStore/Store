@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en" class="h-full">
  <head>
   <meta charset="UTF-8">
@@ -186,7 +186,9 @@
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
-</head>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
  <body class="h-full font-space bg-primary text-primary transition-colors duration-300 dark">
   <div id="app" class="h-full flex flex-col"><!-- Overlay -->
    <div id="overlay" class="overlay fixed inset-0 bg-black/50 z-40" onclick="closeOverlays()"></div><!-- Login/Register Modal -->
@@ -241,7 +243,7 @@
      <div class="mb-6"><label class="block text-sm mb-3 font-medium">Cor</label>
       <div id="color-options" class="grid grid-cols-4 gap-2"></div>
      </div>
-     <div class="flex items-center justify-between mb-6"><span class="text-secondary">Preço:</span> <span id="modal-price" class="font-bebas text-2xl">R$ 0,00</span>
+     <div class="flex items-center justify-between mb-6"><span class="text-secondary">Pre��o:</span> <span id="modal-price" class="font-bebas text-2xl">R$ 0,00</span>
      </div><button onclick="confirmAddToCart()" class="w-full bg-accent px-8 py-4 font-bebas text-lg tracking-wider hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
     </div>
    </div><!-- Cart Sidebar -->
@@ -266,7 +268,7 @@
       <div class="graffiti-logo text-2xl sm:text-3xl cursor-pointer" data-text="DREHMER STORE" id="logo-text">
        DREHMER STORE
       </div>
-      <nav class="hidden md:flex items-center gap-8"><button onclick="switchTab('shop')" class="tab-button active text-sm tracking-wide font-medium py-2" data-tab="shop" id="tab-shop-btn">LOJA</button> <button onclick="switchTab('loan')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="loan" id="tab-loan-btn">EMPRÉSTIMOS</button> <button onclick="switchTab('unlock')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="unlock" id="tab-unlock-btn">DESBLOQUEIO</button> <button onclick="openProfile()" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="profile" id="tab-profile-btn">PERFIL</button> <button onclick="switchTab('about')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="about" id="tab-about-btn">SOBRE</button>
+      <nav class="hidden md:flex items-center gap-8"><button onclick="switchTab('shop')" class="tab-button active text-sm tracking-wide font-medium py-2" data-tab="shop" id="tab-shop-btn">LOJA</button> <button onclick="switchTab('loan')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="loan" id="tab-loan-btn">EMPRÉSTIMOS</button> <button onclick="switchTab('unlock')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="unlock" id="tab-unlock-btn">DESBLOQUEIO</button> <button onclick="switchTab('profile')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="profile" id="tab-profile-btn">PERFIL</button> <button onclick="switchTab('about')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="about" id="tab-about-btn">SOBRE</button>
       </nav>
       <div class="flex items-center gap-3 sm:gap-4"><button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-full hover:bg-secondary transition-colors">
         <svg id="sun-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -282,8 +284,7 @@
       </div>
      </div>
      <div id="mobile-menu" class="hidden md:hidden pb-4">
-      <nav class="flex flex-col gap-3"><button onclick="switchTab('shop'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">LOJA</button> <button onclick="switchTab('loan'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">EMPRÉSTIMOS</button> <button onclick="switchTab('unlock'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">DESBLOQUEIO</button> <button onclick="
-toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">PERFIL</button> <button onclick="switchTab('about'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">SOBRE</button>
+      <nav class="flex flex-col gap-3"><button onclick="switchTab('shop'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">LOJA</button> <button onclick="switchTab('loan'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">EMPRÉSTIMOS</button> <button onclick="switchTab('unlock'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">DESBLOQUEIO</button> <button onclick="switchTab('profile'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">PERFIL</button> <button onclick="switchTab('about'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">SOBRE</button>
       </nav>
      </div>
     </div>
@@ -660,7 +661,7 @@ toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transiti
     let config = { ...defaultConfig };
     let isDark = loadFromLocalStorage('theme') === 'dark' ? true : false;
     let cart = loadFromLocalStorage('cart') || [];
-    let currentFilter = loadFromLocalStorage('currentFilter') || null;
+    let currentFilter = loadFromLocalStorage('currentFilter') || 'summer';
     let currentTab = 'shop';
     let selectedProduct = null;
     let selectedSize = null;
@@ -711,8 +712,7 @@ toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transiti
         
         if (user) {
           await loadUserData(user.uid);
-        openProfile();
-} else {
+        } else {
           currentUser = null;
           currentUserData = null;
           if (unsubscribeUserData) {
@@ -801,7 +801,8 @@ toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transiti
     
     function openAuthModal() {
       if (currentUser) {
-return;
+        switchTab('profile');
+        return;
       }
       document.getElementById('auth-modal').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -850,7 +851,8 @@ return;
         await window.firebaseModules.signInWithEmailAndPassword(window.firebaseAuth, email, password);
         closeAuthModal();
         showToast('Login realizado com sucesso!');
-} catch (error) {
+        switchTab('profile');
+      } catch (error) {
         console.error('Erro no login:', error);
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
           showToast('Email ou senha incorretos');
@@ -907,7 +909,8 @@ return;
         
         closeAuthModal();
         showToast('Conta criada com sucesso!');
-} catch (error) {
+        switchTab('profile');
+      } catch (error) {
         console.error('Erro no registro:', error);
         if (error.code === 'auth/email-already-in-use') {
           showToast('Este email já está cadastrado');
@@ -1648,35 +1651,5 @@ return;
       initApp();
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c0d06795396f1e6',t:'MTc2ODg5NTg5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-<script>
-// --- BOOTSTRAP AUTH ---
-// Garante que o listener do Firebase Auth seja iniciado e a UI só reaja depois disso.
-(function startAuthListener(){
-  function start(){
-    if (typeof initFirebaseAuth === 'function') {
-      initFirebaseAuth();
-    } else {
-      setTimeout(start, 100);
-    }
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start);
-  } else {
-    start();
-  }
-})();
-
-function openProfile() {
-  openProfile();
-  // força atualizar UI
-  if (typeof updateUserInterface === 'function') updateUserInterface();
-  if (typeof loadMyOrders === 'function' && window.currentUser) {
-    try { loadMyOrders(); } catch(e) {}
-  }
-}
-
-</script>
-
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c0dfc7c36daf1e6',t:'MTc2ODkwNTk2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
