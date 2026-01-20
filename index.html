@@ -1,0 +1,1682 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drehmer Store</title>
+  <script src="https://cdn.tailwindcss.com"></script><!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPLGF9Pqsvsm6bA7E6XOkkArZ9K4-sj2M",
+      authDomain: "drehmerstore.firebaseapp.com",
+      projectId: "drehmerstore",
+      storageBucket: "drehmerstore.firebasestorage.app",
+      messagingSenderId: "95177282828",
+      appId: "1:95177282828:web:1b71514fd0d04049e66529",
+      measurementId: "G-ZLP9VB0V3K"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    window.firebaseAuth = getAuth(app);
+    window.firebaseDb = getFirestore(app);
+    window.firebaseModules = {
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut,
+      collection,
+      addDoc,
+      getDocs,
+      updateDoc,
+      deleteDoc,
+      doc,
+      query,
+      where,
+      onSnapshot,
+      serverTimestamp
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    .font-bebas { font-family: 'Bebas Neue', sans-serif; }
+    .font-space { font-family: 'Space Grotesk', sans-serif; }
+    
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --text-primary: #0a0a0a;
+      --text-secondary: #525252;
+      --accent: #0a0a0a;
+    }
+    
+    .dark {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #171717;
+      --text-primary: #fafafa;
+      --text-secondary: #a3a3a3;
+      --accent: #fafafa;
+    }
+    
+    .bg-primary { background-color: var(--bg-primary); }
+    .bg-secondary { background-color: var(--bg-secondary); }
+    .text-primary { color: var(--text-primary); }
+    .text-secondary { color: var(--text-secondary); }
+    .border-accent { border-color: var(--accent); }
+    .bg-accent { background-color: var(--accent); }
+    .text-accent { color: var(--accent); }
+    
+    .cart-sidebar {
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .cart-sidebar.open {
+      transform: translateX(0);
+    }
+    
+    .overlay {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease-in-out;
+    }
+    
+    .overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .product-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-4px);
+    }
+    
+    .graffiti-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: -1px;
+      position: relative;
+      display: inline-block;
+      font-weight: bold;
+      text-transform: uppercase;
+      transform: skewX(-5deg);
+    }
+    
+    .graffiti-logo::before {
+      content: attr(data-text);
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      opacity: 0.4;
+      z-index: -1;
+      background: linear-gradient(135deg, var(--accent) 0%, transparent 60%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .graffiti-logo::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: -4px;
+      right: -4px;
+      height: 4px;
+      background: var(--accent);
+      transform: skewX(5deg);
+      opacity: 0.7;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .tab-button {
+      position: relative;
+      transition: opacity 0.2s ease;
+    }
+    
+    .tab-button:hover {
+      opacity: 0.7;
+    }
+    
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+    
+    .spinner {
+      border: 3px solid var(--bg-secondary);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+</head>
+ <body class="h-full font-space bg-primary text-primary transition-colors duration-300 dark">
+  <div id="app" class="h-full flex flex-col"><!-- Overlay -->
+   <div id="overlay" class="overlay fixed inset-0 bg-black/50 z-40" onclick="closeOverlays()"></div><!-- Login/Register Modal -->
+   <div id="auth-modal" class="overlay fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-primary rounded-lg max-w-md w-full p-6 relative" onclick="event.stopPropagation()"><button onclick="closeAuthModal()" class="absolute top-4 right-4 p-2 hover:opacity-70 transition-opacity">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg></button> <!-- Login Form -->
+     <div id="login-form">
+      <h3 class="font-bebas text-3xl mb-6">ENTRAR</h3>
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+       <div><label for="login-email" class="block text-sm mb-2 font-medium">Email</label> <input type="email" id="login-email" required class="w-full bg-secondary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-secondary); color: var(--text-primary);">
+       </div>
+       <div><label for="login-password" class="block text-sm mb-2 font-medium">Senha</label> <input type="password" id="login-password" required class="w-full bg-secondary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-secondary); color: var(--text-primary);">
+       </div><button type="submit" id="login-btn" class="w-full bg-accent px-8 py-4 font-bebas text-lg tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center" style="background: var(--accent); color: var(--bg-primary);"> <span id="login-btn-text">ENTRAR</span>
+        <div id="login-spinner" class="spinner hidden ml-2"></div></button>
+      </form>
+      <p class="text-center text-secondary text-sm mt-4">Não tem conta? <button onclick="showRegisterForm()" class="text-accent hover:opacity-70">Cadastre-se</button></p>
+     </div><!-- Register Form -->
+     <div id="register-form" class="hidden">
+      <h3 class="font-bebas text-3xl mb-6">CRIAR CONTA</h3>
+      <form onsubmit="handleRegister(event)" class="space-y-4">
+       <div><label for="register-name" class="block text-sm mb-2 font-medium">Nome Completo</label> <input type="text" id="register-name" required class="w-full bg-secondary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-secondary); color: var(--text-primary);">
+       </div>
+       <div><label for="register-email" class="block text-sm mb-2 font-medium">Email</label> <input type="email" id="register-email" required class="w-full bg-secondary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-secondary); color: var(--text-primary);">
+       </div>
+       <div><label for="register-phone" class="block text-sm mb-2 font-medium">Telefone</label> <input type="tel" id="register-phone" required class="w-full bg-secondary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-secondary); color: var(--text-primary);">
+       </div>
+       <div><label for="register-password" class="block text-sm mb-2 font-medium">Senha</label> <input type="password" id="register-password" required minlength="6" class="w-full bg-secondary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-secondary); color: var(--text-primary);">
+       </div><button type="submit" id="register-btn" class="w-full bg-accent px-8 py-4 font-bebas text-lg tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center" style="background: var(--accent); color: var(--bg-primary);"> <span id="register-btn-text">CRIAR CONTA</span>
+        <div id="register-spinner" class="spinner hidden ml-2"></div></button>
+      </form>
+      <p class="text-center text-secondary text-sm mt-4">Já tem conta? <button onclick="showLoginForm()" class="text-accent hover:opacity-70">Entrar</button></p>
+     </div>
+    </div>
+   </div><!-- Product Options Modal -->
+   <div id="options-modal" class="overlay fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-primary rounded-lg max-w-md w-full p-6 relative" onclick="event.stopPropagation()"><button onclick="closeOptionsModal()" class="absolute top-4 right-4 p-2 hover:opacity-70 transition-opacity">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg></button>
+     <h3 id="modal-product-name" class="font-bebas text-2xl mb-6">ESCOLHA AS OPÇÕES</h3>
+     <div id="product-image-container" class="mb-6 flex justify-center">
+      <div class="w-64 h-64 bg-secondary rounded-lg flex items-center justify-center overflow-hidden"><img id="product-image" class="w-full h-full object-contain" style="display: none;" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="Imagem do produto">
+       <div id="product-placeholder" class="flex items-center justify-center w-full h-full">
+        <svg class="w-20 h-20 opacity-20" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+       </div>
+      </div>
+     </div>
+     <div id="size-section" class="mb-6"><label class="block text-sm mb-3 font-medium">Tamanho</label>
+      <div id="size-options" class="grid grid-cols-4 gap-2"></div>
+     </div>
+     <div class="mb-6"><label class="block text-sm mb-3 font-medium">Cor</label>
+      <div id="color-options" class="grid grid-cols-4 gap-2"></div>
+     </div>
+     <div class="flex items-center justify-between mb-6"><span class="text-secondary">Preço:</span> <span id="modal-price" class="font-bebas text-2xl">R$ 0,00</span>
+     </div><button onclick="confirmAddToCart()" class="w-full bg-accent px-8 py-4 font-bebas text-lg tracking-wider hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+    </div>
+   </div><!-- Cart Sidebar -->
+   <aside id="cart-sidebar" class="cart-sidebar fixed right-0 top-0 h-full w-full max-w-md bg-secondary z-50 flex flex-col">
+    <div class="p-6 border-b border-accent/20">
+     <div class="flex items-center justify-between">
+      <h2 class="font-bebas text-2xl tracking-wider">SEU CARRINHO</h2><button onclick="toggleCart()" class="p-2 hover:opacity-70 transition-opacity">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+       </svg></button>
+     </div>
+    </div>
+    <div id="cart-items" class="flex-1 overflow-auto p-6 space-y-4"></div>
+    <div class="p-6 border-t border-accent/20">
+     <div class="flex justify-between items-center mb-4"><span class="text-secondary">Subtotal</span> <span id="cart-total" class="font-bebas text-2xl">R$ 0,00</span>
+     </div><button onclick="finalizarCompraWhatsApp()" class="w-full bg-accent px-8 py-4 font-bebas text-lg tracking-wider hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> FINALIZAR NO WHATSAPP </button>
+     <p class="text-center text-secondary text-sm mt-3">Frete grátis acima de R$ 300</p>
+    </div>
+   </aside><!-- Header -->
+   <header class="bg-primary/95 backdrop-blur-sm z-30 border-b border-accent/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex items-center justify-between h-16 sm:h-20">
+      <div class="graffiti-logo text-2xl sm:text-3xl cursor-pointer" data-text="DREHMER STORE" id="logo-text">
+       DREHMER STORE
+      </div>
+      <nav class="hidden md:flex items-center gap-8"><button onclick="switchTab('shop')" class="tab-button active text-sm tracking-wide font-medium py-2" data-tab="shop" id="tab-shop-btn">LOJA</button> <button onclick="switchTab('loan')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="loan" id="tab-loan-btn">EMPRÉSTIMOS</button> <button onclick="switchTab('unlock')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="unlock" id="tab-unlock-btn">DESBLOQUEIO</button> <button onclick="openProfile()" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="profile" id="tab-profile-btn">PERFIL</button> <button onclick="switchTab('about')" class="tab-button text-sm tracking-wide font-medium py-2" data-tab="about" id="tab-about-btn">SOBRE</button>
+      </nav>
+      <div class="flex items-center gap-3 sm:gap-4"><button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-full hover:bg-secondary transition-colors">
+        <svg id="sun-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg id="moon-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg></button> <button id="user-btn" onclick="openAuthModal()" class="p-2 rounded-full hover:bg-secondary transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg></button> <button onclick="toggleCart()" class="relative p-2 rounded-full hover:bg-secondary transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg><span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 bg-accent text-xs flex items-center justify-center rounded-full font-medium" style="background: var(--accent); color: var(--bg-primary);">0</span> </button> <button class="md:hidden p-2" onclick="toggleMobileMenu()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg></button>
+      </div>
+     </div>
+     <div id="mobile-menu" class="hidden md:hidden pb-4">
+      <nav class="flex flex-col gap-3"><button onclick="switchTab('shop'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">LOJA</button> <button onclick="switchTab('loan'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">EMPRÉSTIMOS</button> <button onclick="switchTab('unlock'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">DESBLOQUEIO</button> <button onclick="
+toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">PERFIL</button> <button onclick="switchTab('about'); toggleMobileMenu();" class="text-sm tracking-wide py-2 hover:opacity-70 transition-opacity text-left">SOBRE</button>
+      </nav>
+     </div>
+    </div>
+   </header><!-- Main Content -->
+   <main class="flex-1 overflow-auto"><!-- WELCOME SCREEN -->
+    <div id="welcome-screen" class="fixed inset-0 bg-primary z-50 flex items-center justify-center">
+     <div class="max-w-2xl mx-auto px-4 text-center">
+      <div class="mb-8 animate-pulse">
+       <div class="graffiti-logo text-5xl sm:text-6xl lg:text-7xl inline-block" data-text="DREHMER STORE">
+        DREHMER STORE
+       </div>
+      </div>
+      <h1 class="font-bebas text-4xl sm:text-5xl mb-6 tracking-wide">SEJA BEM-VINDO</h1>
+      <p class="text-secondary text-lg sm:text-xl mb-12 leading-relaxed max-w-xl mx-auto">Sua loja de streetwear, tech e serviços especializados. Produtos exclusivos, desbloqueio profissional e empréstimos rápidos. Tudo que você precisa em um só lugar.</p><button onclick="enterStore()" class="bg-accent px-12 py-5 font-bebas text-xl tracking-wider hover:opacity-90 transition-all transform hover:scale-105" style="background: var(--accent); color: var(--bg-primary);"> ENTRAR NA LOJA </button>
+      <div class="mt-12 flex justify-center gap-8 text-sm text-secondary">
+       <div class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg><span>Produtos Originais</span>
+       </div>
+       <div class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg><span>Entrega Rápida</span>
+       </div>
+       <div class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg><span>Garantia Total</span>
+       </div>
+      </div>
+     </div>
+    </div><!-- SHOP TAB -->
+    <div id="tab-shop" class="tab-content active">
+     <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <div class="max-w-7xl mx-auto">
+       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-12 gap-4">
+        <h2 class="font-bebas text-3xl sm:text-4xl tracking-wider">TODOS OS PRODUTOS</h2>
+        <div class="flex gap-2 flex-wrap"><button onclick="filterProducts('summer')" class="filter-btn px-4 py-2 text-sm border border-accent/30 hover:bg-accent hover:text-primary transition-colors" data-filter="summer" style="background: var(--accent); color: var(--bg-primary);">KIT VERÃO</button> <button onclick="filterProducts('winter')" class="filter-btn px-4 py-2 text-sm border border-accent/30 hover:bg-accent hover:text-primary transition-colors" data-filter="winter">KIT INVERNO</button> <button onclick="filterProducts('party')" class="filter-btn px-4 py-2 text-sm border border-accent/30 hover:bg-accent hover:text-primary transition-colors" data-filter="party">KIT FERVO</button>
+        </div>
+       </div>
+       <div id="products-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"></div>
+      </div>
+     </section>
+    </div><!-- LOAN TAB -->
+    <div id="tab-loan" class="tab-content">
+     <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <div class="max-w-4xl mx-auto">
+       <h2 class="font-bebas text-3xl sm:text-4xl tracking-wider mb-4">EMPRÉSTIMOS RÁPIDOS</h2>
+       <p class="text-secondary text-lg mb-12 max-w-2xl">Crédito rápido e fácil. Simule seu empréstimo e adicione ao carrinho.</p>
+       <div class="bg-secondary p-8 rounded-lg border border-accent/10 mb-8">
+        <h3 class="font-bebas text-2xl mb-6">SIMULADOR DE EMPRÉSTIMO</h3>
+        <div class="mb-8">
+         <div class="flex justify-between items-center mb-3"><label class="text-sm font-medium">Valor desejado</label> <span id="loan-amount-display" class="font-bebas text-3xl text-accent">R$ 500</span>
+         </div><input type="range" id="loan-slider" min="100" max="1000" value="500" step="50" oninput="updateLoanCalculation(this.value)" class="w-full h-3 bg-primary rounded-lg appearance-none cursor-pointer accent-current" style="accent-color: var(--accent);">
+         <div class="flex justify-between text-xs text-secondary mt-2"><span>R$ 100</span> <span>R$ 1.000</span>
+         </div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-6 mb-8">
+         <div class="bg-primary p-6 rounded-lg border border-accent/20">
+          <div class="text-secondary text-sm mb-2">
+           Valor a pagar (com juros)
+          </div>
+          <div id="loan-total" class="font-bebas text-4xl text-accent">
+           R$ 1.000
+          </div>
+          <div class="text-secondary text-xs mt-2">
+           Juros de 100%
+          </div>
+         </div>
+         <div class="bg-primary p-6 rounded-lg border border-accent/20">
+          <div class="text-secondary text-sm mb-2">
+           Parcelas sugeridas
+          </div>
+          <div class="space-y-2 mt-3">
+           <div class="flex justify-between text-sm"><span>1x de</span> <span id="installment-1" class="font-medium">R$ 1.000</span>
+           </div>
+           <div class="flex justify-between text-sm"><span>2x de</span> <span id="installment-2" class="font-medium">R$ 500</span>
+           </div>
+           <div class="flex justify-between text-sm"><span>4x de</span> <span id="installment-4" class="font-medium">R$ 250</span>
+           </div>
+          </div>
+         </div>
+        </div><button onclick="addLoanToCart()" class="w-full bg-accent px-8 py-4 font-bebas text-lg tracking-wider hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR EMPRÉSTIMO AO CARRINHO </button>
+       </div>
+       <div class="bg-secondary p-8 rounded-lg border border-accent/10">
+        <h3 class="font-bebas text-2xl mb-4">COMO FUNCIONA</h3>
+        <div class="space-y-4">
+         <div class="flex items-start gap-4">
+          <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--accent); color: var(--bg-primary);"><span class="font-bebas text-lg">1</span>
+          </div>
+          <div>
+           <h4 class="font-medium mb-1">Simule o valor</h4>
+           <p class="text-secondary text-sm">Escolha o valor que precisa, de R$ 100 até R$ 1.000</p>
+          </div>
+         </div>
+         <div class="flex items-start gap-4">
+          <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--accent); color: var(--bg-primary);"><span class="font-bebas text-lg">2</span>
+          </div>
+          <div>
+           <h4 class="font-medium mb-1">Adicione ao carrinho</h4>
+           <p class="text-secondary text-sm">Clique em adicionar e veja os detalhes no carrinho</p>
+          </div>
+         </div>
+         <div class="flex items-start gap-4">
+          <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--accent); color: var(--bg-primary);"><span class="font-bebas text-lg">3</span>
+          </div>
+          <div>
+           <h4 class="font-medium mb-1">Finalize pelo WhatsApp</h4>
+           <p class="text-secondary text-sm">Envie a solicitação e aguarde a aprovação rápida</p>
+          </div>
+         </div>
+        </div>
+        <div class="mt-6 pt-6 border-t border-accent/20">
+         <h4 class="font-medium mb-3">⚠️ Importante:</h4>
+         <ul class="space-y-2 text-secondary text-sm">
+          <li>• Taxa de juros de 100% sobre o valor solicitado</li>
+          <li>• Aprovação sujeita à análise de crédito</li>
+          <li>• Documentos necessários: RG, CPF e comprovante de renda</li>
+          <li>• Pagamento via PIX ou transferência bancária</li>
+         </ul>
+        </div>
+       </div>
+      </div>
+     </section>
+    </div><!-- UNLOCK TAB -->
+    <div id="tab-unlock" class="tab-content">
+     <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <div class="max-w-7xl mx-auto">
+       <h2 class="font-bebas text-3xl sm:text-4xl tracking-wider mb-4">DESBLOQUEIO DE APARELHOS</h2>
+       <p class="text-secondary text-lg mb-12 max-w-2xl">Desbloqueio profissional para iPhone e Android. Adicione ao carrinho e finalize.</p>
+       <div class="mb-12">
+        <h3 class="font-bebas text-2xl mb-6 flex items-center gap-3">
+         <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+         </svg> IPHONE</h3>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">iPhone 7 / 7 Plus</h4>
+          <p class="text-secondary text-sm mb-3">Desbloqueio de operadora e iCloud</p>
+          <p class="font-bebas text-2xl text-accent">R$ 199,90</p><button onclick="addUnlockToCart('iPhone 7 / 7 Plus', 199.90)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+         </div>
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">iPhone 8 / 8 Plus</h4>
+          <p class="text-secondary text-sm mb-3">Desbloqueio de operadora e iCloud</p>
+          <p class="font-bebas text-2xl text-accent">R$ 249,90</p><button onclick="addUnlockToCart('iPhone 8 / 8 Plus', 249.90)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+         </div>
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">iPhone X / XR / XS</h4>
+          <p class="text-secondary text-sm mb-3">Desbloqueio de operadora e iCloud</p>
+          <p class="font-bebas text-2xl text-accent">R$ 299,90</p><button onclick="addUnlockToCart('iPhone X / XR / XS', 299.90)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+         </div>
+        </div>
+       </div>
+       <div class="mb-12">
+        <h3 class="font-bebas text-2xl mb-6 flex items-center gap-3">
+         <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85a.637.637 0 00-.83.22l-1.88 3.24a11.43 11.43 0 00-8.94 0L5.65 5.67a.643.643 0 00-.87-.2c-.28.18-.37.54-.22.83L6.4 9.48A10.81 10.81 0 001 18h22a10.81 10.81 0 00-5.4-8.52zM7 15.25a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5zm10 0a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z" />
+         </svg> ANDROID</h3>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">Xiaomi Mi 9 / 9T</h4>
+          <p class="text-secondary text-sm mb-3">Desbloqueio de conta Mi e operadora</p>
+          <p class="font-bebas text-2xl text-accent">R$ 149,90</p><button onclick="addUnlockToCart('Xiaomi Mi 9 / 9T', 149.90)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+         </div>
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">Xiaomi Mi 10 / 10T</h4>
+          <p class="text-secondary text-sm mb-3">Desbloqueio de conta Mi e operadora</p>
+          <p class="font-bebas text-2xl text-accent">R$ 179,90</p><button onclick="addUnlockToCart('Xiaomi Mi 10 / 10T', 179.90)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+         </div>
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">Samsung Galaxy</h4>
+          <p class="text-secondary text-sm mb-3">Desbloqueio de conta Google e operadora</p>
+          <p class="font-bebas text-2xl text-accent">R$ 159,90</p><button onclick="addUnlockToCart('Samsung Galaxy', 159.90)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+         </div>
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">Motorola</h4>
+          <p class="text-secondary text-sm mb-3">Desbloqueio de conta Google e operadora</p>
+          <p class="font-bebas text-2xl text-accent">R$ 139,90</p><button onclick="addUnlockToCart('Motorola', 139.90)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+         </div>
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">LG</h4>
+          <p class="text-secondary text-sm mb-3">Desbloqueio de conta Google e operadora</p>
+          <p class="font-bebas text-2xl text-accent">R$ 129,90</p><button onclick="addUnlockToCart('LG', 129.90)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ADICIONAR AO CARRINHO </button>
+         </div>
+         <div class="bg-secondary p-6 rounded-lg hover:bg-accent/5 transition-colors border border-accent/10">
+          <h4 class="font-bebas text-xl mb-2">Outros Modelos</h4>
+          <p class="text-secondary text-sm mb-3">Consulte disponibilidade e preço</p>
+          <p class="font-bebas text-2xl text-accent">A consultar</p><button onclick="addUnlockToCart('Outro modelo Android', 0)" class="w-full mt-4 bg-accent px-4 py-3 font-medium text-sm hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> CONSULTAR </button>
+         </div>
+        </div>
+       </div>
+       <div class="bg-secondary p-8 rounded-lg border border-accent/10">
+        <h3 class="font-bebas text-2xl mb-4">IMPORTANTE</h3>
+        <ul class="space-y-3 text-secondary">
+         <li class="flex items-start gap-3"><span class="text-accent mt-1">✓</span> <span>Todos os desbloqueios são realizados de forma profissional e segura</span></li>
+         <li class="flex items-start gap-3"><span class="text-accent mt-1">✓</span> <span>Prazo médio de 24 a 48 horas úteis</span></li>
+         <li class="flex items-start gap-3"><span class="text-accent mt-1">✓</span> <span>Garantia de 30 dias em todos os serviços</span></li>
+         <li class="flex items-start gap-3"><span class="text-accent mt-1">✓</span> <span>É necessário apresentar nota fiscal ou documento de propriedade</span></li>
+         <li class="flex items-start gap-3"><span class="text-accent mt-1">✓</span> <span>Entre em contato para modelos não listados</span></li>
+        </ul>
+       </div>
+      </div>
+     </section>
+    </div><!-- PROFILE TAB -->
+    <div id="tab-profile" class="tab-content">
+     <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <div class="max-w-4xl mx-auto">
+       <div id="profile-logged-out" class="text-center py-20">
+        <svg class="w-24 h-24 mx-auto mb-6 opacity-30" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <h2 class="font-bebas text-3xl mb-4">FAÇA LOGIN</h2>
+        <p class="text-secondary mb-8">Entre ou crie uma conta para acessar seu perfil</p><button onclick="openAuthModal()" class="bg-accent px-8 py-4 font-bebas text-lg tracking-wider hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> ENTRAR / CADASTRAR </button>
+       </div>
+       <div id="profile-logged-in" class="hidden">
+        <h2 class="font-bebas text-3xl sm:text-4xl tracking-wider mb-8">MEU PERFIL</h2><!-- Loyalty Points Banner -->
+        <div class="bg-gradient-to-r from-accent/20 to-accent/10 p-8 rounded-lg mb-8 border border-accent/20">
+         <div class="flex items-center justify-between">
+          <div>
+           <h3 class="font-bebas text-2xl mb-2">PROGRAMA DE FIDELIDADE</h3>
+           <p class="text-secondary text-sm">A cada R$ 10 gastos = 1 ponto</p>
+          </div>
+          <div class="text-right">
+           <div id="loyalty-points" class="font-bebas text-5xl text-accent">
+            0
+           </div>
+           <div class="text-secondary text-sm">
+            pontos
+           </div>
+          </div>
+         </div>
+         <div class="mt-4 text-sm text-secondary">
+          💰 Total gasto: <span id="total-spent" class="font-medium">R$ 0,00</span>
+         </div>
+        </div><!-- Profile Info -->
+        <div class="bg-secondary p-8 rounded-lg mb-8">
+         <div class="flex items-center justify-between mb-6">
+          <h3 class="font-bebas text-2xl">DADOS PESSOAIS</h3><button onclick="editProfile()" class="text-accent hover:opacity-70 text-sm font-medium">Editar</button>
+         </div>
+         <div id="profile-view" class="space-y-4">
+          <div><label class="text-secondary text-sm">Nome</label>
+           <p id="profile-name" class="font-medium">-</p>
+          </div>
+          <div><label class="text-secondary text-sm">Email</label>
+           <p id="profile-email" class="font-medium">-</p>
+          </div>
+          <div><label class="text-secondary text-sm">Telefone</label>
+           <p id="profile-phone" class="font-medium">-</p>
+          </div>
+         </div>
+         <form id="profile-edit" class="hidden space-y-4" onsubmit="saveProfile(event)">
+          <div><label for="edit-name" class="block text-sm mb-2 font-medium">Nome Completo</label> <input type="text" id="edit-name" required class="w-full bg-primary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-primary); color: var(--text-primary);">
+          </div>
+          <div><label for="edit-phone" class="block text-sm mb-2 font-medium">Telefone</label> <input type="tel" id="edit-phone" required class="w-full bg-primary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-primary); color: var(--text-primary);">
+          </div>
+          <div class="flex gap-3"><button type="submit" class="flex-1 bg-accent px-6 py-3 font-medium hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> SALVAR </button> <button type="button" onclick="cancelEditProfile()" class="flex-1 border border-accent/30 px-6 py-3 font-medium hover:bg-accent/10 transition-colors"> CANCELAR </button>
+          </div>
+         </form>
+        </div><!-- Address Info -->
+        <div class="bg-secondary p-8 rounded-lg mb-8">
+         <div class="flex items-center justify-between mb-6">
+          <h3 class="font-bebas text-2xl">ENDEREÇO DE ENTREGA</h3><button onclick="editAddress()" class="text-accent hover:opacity-70 text-sm font-medium">Editar</button>
+         </div>
+         <div id="address-view" class="space-y-4">
+          <div><label class="text-secondary text-sm">Endereço</label>
+           <p id="profile-address" class="font-medium">-</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+           <div><label class="text-secondary text-sm">Cidade</label>
+            <p id="profile-city" class="font-medium">-</p>
+           </div>
+           <div><label class="text-secondary text-sm">Estado</label>
+            <p id="profile-state" class="font-medium">-</p>
+           </div>
+          </div>
+          <div><label class="text-secondary text-sm">CEP</label>
+           <p id="profile-zipcode" class="font-medium">-</p>
+          </div>
+         </div>
+         <form id="address-edit" class="hidden space-y-4" onsubmit="saveAddress(event)">
+          <div><label for="edit-address" class="block text-sm mb-2 font-medium">Endereço Completo</label> <input type="text" id="edit-address" required class="w-full bg-primary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-primary); color: var(--text-primary);">
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+           <div><label for="edit-city" class="block text-sm mb-2 font-medium">Cidade</label> <input type="text" id="edit-city" required class="w-full bg-primary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-primary); color: var(--text-primary);">
+           </div>
+           <div><label for="edit-state" class="block text-sm mb-2 font-medium">Estado</label> <input type="text" id="edit-state" required maxlength="2" class="w-full bg-primary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-primary); color: var(--text-primary);">
+           </div>
+          </div>
+          <div><label for="edit-zipcode" class="block text-sm mb-2 font-medium">CEP</label> <input type="text" id="edit-zipcode" required class="w-full bg-primary px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-accent/50" style="background: var(--bg-primary); color: var(--text-primary);">
+          </div>
+          <div class="flex gap-3"><button type="submit" class="flex-1 bg-accent px-6 py-3 font-medium hover:opacity-90 transition-opacity" style="background: var(--accent); color: var(--bg-primary);"> SALVAR </button> <button type="button" onclick="cancelEditAddress()" class="flex-1 border border-accent/30 px-6 py-3 font-medium hover:bg-accent/10 transition-colors"> CANCELAR </button>
+          </div>
+         </form>
+        </div><!-- Purchase History -->
+        <div class="bg-secondary p-8 rounded-lg mb-8">
+         <h3 class="font-bebas text-2xl mb-6">HISTÓRICO DE COMPRAS</h3>
+         <div id="purchase-history" class="space-y-4">
+          <p class="text-secondary text-center py-8">Nenhuma compra realizada ainda</p>
+         </div>
+        </div><!-- Logout Button --> <button onclick="logout()" class="w-full border border-red-500 text-red-500 px-8 py-4 font-bebas text-lg tracking-wider hover:bg-red-500 hover:text-white transition-colors"> SAIR DA CONTA </button>
+       </div>
+      </div>
+     </section>
+    </div><!-- ABOUT TAB -->
+    <div id="tab-about" class="tab-content">
+     <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <div class="max-w-4xl mx-auto">
+       <h2 class="font-bebas text-3xl sm:text-4xl tracking-wider mb-6">SOBRE NÓS</h2>
+       <div class="space-y-8 mb-12">
+        <div>
+         <h3 class="font-bebas text-2xl mb-3">NOSSA HISTÓRIA</h3>
+         <p class="text-secondary leading-relaxed">Nascemos das ruas brasileiras em 2024, trazendo autenticidade e estilo para quem vive a cultura urbana. Somos mais que uma loja - somos um movimento que une streetwear e tecnologia.</p>
+        </div>
+        <div>
+         <h3 class="font-bebas text-2xl mb-3">NOSSA MISSÃO</h3>
+         <p class="text-secondary leading-relaxed">Representar a verdadeira cultura de rua brasileira através de produtos de qualidade, design único e atendimento especializado. Conectamos estilo e tecnologia para quem não abre mão de autenticidade.</p>
+        </div>
+        <div>
+         <h3 class="font-bebas text-2xl mb-3">VALORES</h3>
+         <ul class="space-y-2 text-secondary">
+          <li>✓ Autenticidade acima de tudo</li>
+          <li>✓ Qualidade sem compromisso</li>
+          <li>✓ Atendimento personalizado</li>
+          <li>✓ Conexão com a cultura urbana brasileira</li>
+          <li>✓ Inovação constante</li>
+         </ul>
+        </div>
+       </div>
+       <div class="bg-secondary p-8 rounded-lg mb-12">
+        <h3 class="font-bebas text-2xl mb-6">ONDE ESTAMOS</h3>
+        <div class="space-y-4 text-secondary">
+         <p><strong class="text-primary">Endereço:</strong><br>
+           Rua da Cultura, 123 - Centro<br>
+           São Paulo, SP - CEP 01000-000</p>
+         <p><strong class="text-primary">Horário:</strong><br>
+           Segunda a Sábado: 10h às 20h<br>
+           Domingo: 12h às 18h</p>
+         <p><strong class="text-primary">Contato:</strong><br>
+           WhatsApp: (11) 99999-9999<br>
+           Email: contato@streetculture.com.br</p>
+        </div>
+       </div>
+       <div>
+        <h3 class="font-bebas text-2xl mb-6 text-center">SIGA A GENTE</h3>
+        <div class="flex justify-center gap-6"><a href="#" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 transition-opacity">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+          </svg></a> <a href="#" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 transition-opacity">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
+          </svg></a> <a href="#" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 transition-opacity">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+          </svg></a>
+        </div>
+       </div>
+      </div>
+     </section>
+    </div>
+   </main><!-- Footer -->
+   <footer class="py-8 px-4 sm:px-6 lg:px-8 border-t border-accent/10 bg-secondary">
+    <div class="max-w-7xl mx-auto text-center text-sm text-secondary">
+     <p>© 2024 DREHMER STORE. Streetwear e tecnologia.</p>
+    </div>
+   </footer>
+  </div>
+  <script>
+    const defaultConfig = {
+      store_name: 'DREHMER STORE',
+      tab_shop: 'LOJA',
+      tab_unlock: 'DESBLOQUEIO',
+      tab_about: 'SOBRE',
+      background_color: '#ffffff',
+      surface_color: '#f5f5f5',
+      text_color: '#0a0a0a',
+      primary_action_color: '#0a0a0a',
+      secondary_action_color: '#525252',
+      font_family: 'Space Grotesk',
+      font_size: 16
+    };
+    
+    let config = { ...defaultConfig };
+    let isDark = loadFromLocalStorage('theme') === 'dark' ? true : false;
+    let cart = loadFromLocalStorage('cart') || [];
+    let currentFilter = loadFromLocalStorage('currentFilter') || null;
+    let currentTab = 'shop';
+    let selectedProduct = null;
+    let selectedSize = null;
+    let selectedColor = null;
+    let loanAmount = loadFromLocalStorage('loanAmount') || 500;
+    let currentUser = null;
+    let currentUserData = null;
+    let firebaseUser = null;
+    let isLoading = false;
+    let unsubscribeUserData = null;
+    
+    // Funções de localStorage
+    function saveToLocalStorage(key, value) {
+      try {
+        localStorage.setItem(`drehmer_${key}`, JSON.stringify(value));
+      } catch (e) {
+        console.error('Erro ao salvar no localStorage:', e);
+      }
+    }
+    
+    function loadFromLocalStorage(key) {
+      try {
+        const item = localStorage.getItem(`drehmer_${key}`);
+        return item ? JSON.parse(item) : null;
+      } catch (e) {
+        console.error('Erro ao carregar do localStorage:', e);
+        return null;
+      }
+    }
+    
+    function removeFromLocalStorage(key) {
+      try {
+        localStorage.removeItem(`drehmer_${key}`);
+      } catch (e) {
+        console.error('Erro ao remover do localStorage:', e);
+      }
+    }
+    
+    // Inicialização Firebase Auth
+    function initFirebaseAuth() {
+      if (!window.firebaseAuth || !window.firebaseModules) {
+        setTimeout(initFirebaseAuth, 100);
+        return;
+      }
+      
+      window.firebaseModules.onAuthStateChanged(window.firebaseAuth, async (user) => {
+        firebaseUser = user;
+        
+        if (user) {
+          await loadUserData(user.uid);
+        openProfile();
+} else {
+          currentUser = null;
+          currentUserData = null;
+          if (unsubscribeUserData) {
+            unsubscribeUserData();
+            unsubscribeUserData = null;
+          }
+          updateUserInterface();
+        }
+      });
+    }
+    
+    // Carregar dados do usuário do Firestore
+    async function loadUserData(uid) {
+      if (!window.firebaseDb || !window.firebaseModules) return;
+      
+      const { collection, query, where, onSnapshot } = window.firebaseModules;
+      const usersRef = collection(window.firebaseDb, 'users');
+      const q = query(usersRef, where('uid', '==', uid));
+      
+      if (unsubscribeUserData) {
+        unsubscribeUserData();
+      }
+      
+      unsubscribeUserData = onSnapshot(q, (snapshot) => {
+        if (!snapshot.empty) {
+          const userData = snapshot.docs[0];
+          currentUserData = { id: userData.id, ...userData.data() };
+          currentUser = currentUserData;
+          updateUserInterface();
+        } else {
+          createUserDocument(uid);
+        }
+      });
+    }
+    
+    // Criar documento do usuário no Firestore
+    async function createUserDocument(uid) {
+      if (!window.firebaseDb || !window.firebaseModules) return;
+      
+      const { collection, addDoc, serverTimestamp } = window.firebaseModules;
+      
+      const userData = {
+        uid: uid,
+        email: firebaseUser.email,
+        name: firebaseUser.email.split('@')[0],
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        loyaltyPoints: 0,
+        totalSpent: 0,
+        createdAt: serverTimestamp()
+      };
+      
+      try {
+        await addDoc(collection(window.firebaseDb, 'users'), userData);
+      } catch (error) {
+        console.error('Erro ao criar usuário:', error);
+      }
+    }
+    const products = [
+      { id: 1, name: 'Short Osascorte', price: 89.90, category: 'summer', type: 'product', sizes: ['M', 'G', 'GG'], colors: ['Preto', 'Branco'], imagePrefix: 'short' },
+      { id: 2, name: 'Camisa Osascorte', price: 129.90, category: 'summer', type: 'product', sizes: ['M', 'G', 'GG'], colors: ['Preto', 'Branco'], imagePrefix: 'camisa' },
+      { id: 3, name: 'Chapéu Quicksilver', price: 79.90, category: 'summer', type: 'product', sizes: [], colors: ['Preto', 'Branco'], imagePrefix: 'chapeu' },
+      { id: 4, name: 'Óculos', price: 149.90, category: 'summer', type: 'product', sizes: [], colors: ['Dourada', 'Chumbo', 'Cromada', 'Preto'], imagePrefix: 'oculos' },
+      { id: 5, name: 'Hoodie Oversized', price: 249.90, category: 'winter', type: 'product', sizes: ['M', 'G', 'GG'], colors: ['Preto', 'Verde', 'Azul'] },
+      { id: 6, name: 'Mousepad XL Street', price: 89.90, category: 'party', type: 'product', sizes: [], colors: ['Preto', 'Vermelho'] },
+      { id: 7, name: 'Cabo Custom RGB', price: 149.90, category: 'party', type: 'product', sizes: [], colors: ['Preto', 'Branco'] },
+      { id: 8, name: 'Calça Cargo', price: 289.90, category: 'winter', type: 'product', sizes: ['P', 'M', 'G', 'GG'], colors: ['Verde', 'Bege', 'Preto'] }
+    ];
+    
+    function enterStore() {
+      document.getElementById('welcome-screen').style.display = 'none';
+    }
+    
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-accent text-primary px-6 py-3 rounded-lg shadow-lg z-50';
+      toast.style.background = 'var(--accent)';
+      toast.style.color = 'var(--bg-primary)';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    function openAuthModal() {
+      if (currentUser) {
+return;
+      }
+      document.getElementById('auth-modal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.remove('open');
+      document.body.style.overflow = 'auto';
+      showLoginForm();
+    }
+    
+    function showLoginForm() {
+      document.getElementById('login-form').classList.remove('hidden');
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+    }
+    
+    function showRegisterForm() {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+      document.getElementById('register-name').value = '';
+      document.getElementById('register-email').value = '';
+      document.getElementById('register-phone').value = '';
+      document.getElementById('register-password').value = '';
+    }
+    
+    async function handleLogin(event) {
+      event.preventDefault();
+      
+      if (isLoading || !window.firebaseAuth || !window.firebaseModules) return;
+      isLoading = true;
+      
+      const loginBtn = document.getElementById('login-btn');
+      const loginBtnText = document.getElementById('login-btn-text');
+      const loginSpinner = document.getElementById('login-spinner');
+      
+      loginBtn.disabled = true;
+      loginBtnText.textContent = 'ENTRANDO...';
+      loginSpinner.classList.remove('hidden');
+      
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      try {
+        await window.firebaseModules.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+        closeAuthModal();
+        showToast('Login realizado com sucesso!');
+} catch (error) {
+        console.error('Erro no login:', error);
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+          showToast('Email ou senha incorretos');
+        } else if (error.code === 'auth/invalid-email') {
+          showToast('Email inválido');
+        } else {
+          showToast('Erro ao fazer login. Tente novamente.');
+        }
+      }
+      
+      loginBtn.disabled = false;
+      loginBtnText.textContent = 'ENTRAR';
+      loginSpinner.classList.add('hidden');
+      isLoading = false;
+    }
+    
+    async function handleRegister(event) {
+      event.preventDefault();
+      
+      if (isLoading || !window.firebaseAuth || !window.firebaseModules) return;
+      isLoading = true;
+      
+      const registerBtn = document.getElementById('register-btn');
+      const registerBtnText = document.getElementById('register-btn-text');
+      const registerSpinner = document.getElementById('register-spinner');
+      
+      registerBtn.disabled = true;
+      registerBtnText.textContent = 'CRIANDO...';
+      registerSpinner.classList.remove('hidden');
+      
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const phone = document.getElementById('register-phone').value;
+      const password = document.getElementById('register-password').value;
+      
+      try {
+        const userCredential = await window.firebaseModules.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+        
+        // Criar documento do usuário com informações adicionais
+        const { collection, addDoc, serverTimestamp } = window.firebaseModules;
+        await addDoc(collection(window.firebaseDb, 'users'), {
+          uid: userCredential.user.uid,
+          email: email,
+          name: name,
+          phone: phone,
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          loyaltyPoints: 0,
+          totalSpent: 0,
+          createdAt: serverTimestamp()
+        });
+        
+        closeAuthModal();
+        showToast('Conta criada com sucesso!');
+} catch (error) {
+        console.error('Erro no registro:', error);
+        if (error.code === 'auth/email-already-in-use') {
+          showToast('Este email já está cadastrado');
+        } else if (error.code === 'auth/invalid-email') {
+          showToast('Email inválido');
+        } else if (error.code === 'auth/weak-password') {
+          showToast('Senha muito fraca. Use pelo menos 6 caracteres');
+        } else {
+          showToast('Erro ao criar conta. Tente novamente.');
+        }
+      }
+      
+      registerBtn.disabled = false;
+      registerBtnText.textContent = 'CRIAR CONTA';
+      registerSpinner.classList.add('hidden');
+      isLoading = false;
+    }
+    
+    function updateUserInterface() {
+      if (currentUser) {
+        document.getElementById('profile-logged-out').classList.add('hidden');
+        document.getElementById('profile-logged-in').classList.remove('hidden');
+        updateProfileDisplay();
+      } else {
+        document.getElementById('profile-logged-out').classList.remove('hidden');
+        document.getElementById('profile-logged-in').classList.add('hidden');
+      }
+    }
+    
+    async function updateProfileDisplay() {
+      if (!currentUser) return;
+      
+      document.getElementById('profile-name').textContent = currentUser.name || '-';
+      document.getElementById('profile-email').textContent = currentUser.email || '-';
+      document.getElementById('profile-phone').textContent = currentUser.phone || '-';
+      document.getElementById('profile-address').textContent = currentUser.address || '-';
+      document.getElementById('profile-city').textContent = currentUser.city || '-';
+      document.getElementById('profile-state').textContent = currentUser.state || '-';
+      document.getElementById('profile-zipcode').textContent = currentUser.zipCode || '-';
+      
+      document.getElementById('loyalty-points').textContent = currentUser.loyaltyPoints || 0;
+      document.getElementById('total-spent').textContent = formatPrice(currentUser.totalSpent || 0);
+      
+      // Carregar histórico de compras do Firestore
+      if (window.firebaseDb && window.firebaseModules && currentUser.uid) {
+        const { collection, query, where, getDocs } = window.firebaseModules;
+        const purchasesRef = collection(window.firebaseDb, 'purchases');
+        const q = query(purchasesRef, where('uid', '==', currentUser.uid));
+        
+        try {
+          const querySnapshot = await getDocs(q);
+          const purchases = [];
+          querySnapshot.forEach((doc) => {
+            purchases.push({ id: doc.id, ...doc.data() });
+          });
+          
+          const historyContainer = document.getElementById('purchase-history');
+          
+          if (purchases.length === 0) {
+            historyContainer.innerHTML = '<p class="text-secondary text-center py-8">Nenhuma compra realizada ainda</p>';
+          } else {
+            historyContainer.innerHTML = purchases.sort((a, b) => {
+              const dateA = a.purchaseDate?.toDate ? a.purchaseDate.toDate() : new Date(a.purchaseDate);
+              const dateB = b.purchaseDate?.toDate ? b.purchaseDate.toDate() : new Date(b.purchaseDate);
+              return dateB - dateA;
+            }).map(purchase => {
+              const purchaseDate = purchase.purchaseDate?.toDate ? purchase.purchaseDate.toDate() : new Date(purchase.purchaseDate);
+              return `
+                <div class="bg-primary p-4 rounded-lg border border-accent/10">
+                  <div class="flex justify-between items-start mb-2">
+                    <div>
+                      <h4 class="font-medium">${purchase.productName}</h4>
+                      <p class="text-secondary text-xs mt-1">${purchaseDate.toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <span class="font-bebas text-xl">${formatPrice(purchase.price)}</span>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        } catch (error) {
+          console.error('Erro ao carregar compras:', error);
+        }
+      }
+    }
+    
+    function editProfile() {
+      document.getElementById('profile-view').classList.add('hidden');
+      document.getElementById('profile-edit').classList.remove('hidden');
+      
+      document.getElementById('edit-name').value = currentUser.name || '';
+      document.getElementById('edit-phone').value = currentUser.phone || '';
+    }
+    
+    function cancelEditProfile() {
+      document.getElementById('profile-view').classList.remove('hidden');
+      document.getElementById('profile-edit').classList.add('hidden');
+    }
+    
+    async function saveProfile(event) {
+      event.preventDefault();
+      
+      if (!currentUser || isLoading || !window.firebaseDb || !window.firebaseModules) return;
+      isLoading = true;
+      
+      const name = document.getElementById('edit-name').value;
+      const phone = document.getElementById('edit-phone').value;
+      
+      try {
+        const { doc, updateDoc } = window.firebaseModules;
+        const userRef = doc(window.firebaseDb, 'users', currentUser.id);
+        
+        await updateDoc(userRef, {
+          name: name,
+          phone: phone
+        });
+        
+        showToast('Perfil atualizado!');
+        cancelEditProfile();
+      } catch (error) {
+        console.error('Erro ao atualizar perfil:', error);
+        showToast('Erro ao atualizar perfil');
+      }
+      
+      isLoading = false;
+    }
+    
+    function editAddress() {
+      document.getElementById('address-view').classList.add('hidden');
+      document.getElementById('address-edit').classList.remove('hidden');
+      
+      document.getElementById('edit-address').value = currentUser.address || '';
+      document.getElementById('edit-city').value = currentUser.city || '';
+      document.getElementById('edit-state').value = currentUser.state || '';
+      document.getElementById('edit-zipcode').value = currentUser.zipCode || '';
+    }
+    
+    function cancelEditAddress() {
+      document.getElementById('address-view').classList.remove('hidden');
+      document.getElementById('address-edit').classList.add('hidden');
+    }
+    
+    async function saveAddress(event) {
+      event.preventDefault();
+      
+      if (!currentUser || isLoading || !window.firebaseDb || !window.firebaseModules) return;
+      isLoading = true;
+      
+      const address = document.getElementById('edit-address').value;
+      const city = document.getElementById('edit-city').value;
+      const state = document.getElementById('edit-state').value;
+      const zipCode = document.getElementById('edit-zipcode').value;
+      
+      try {
+        const { doc, updateDoc } = window.firebaseModules;
+        const userRef = doc(window.firebaseDb, 'users', currentUser.id);
+        
+        await updateDoc(userRef, {
+          address: address,
+          city: city,
+          state: state,
+          zipCode: zipCode
+        });
+        
+        showToast('Endereço atualizado!');
+        cancelEditAddress();
+      } catch (error) {
+        console.error('Erro ao atualizar endereço:', error);
+        showToast('Erro ao atualizar endereço');
+      }
+      
+      isLoading = false;
+    }
+    
+    async function logout() {
+      if (!window.firebaseAuth || !window.firebaseModules) return;
+      
+      try {
+        await window.firebaseModules.signOut(window.firebaseAuth);
+        currentUser = null;
+        currentUserData = null;
+        firebaseUser = null;
+        if (unsubscribeUserData) {
+          unsubscribeUserData();
+          unsubscribeUserData = null;
+        }
+        updateUserInterface();
+        switchTab('shop');
+        showToast('Logout realizado');
+      } catch (error) {
+        console.error('Erro no logout:', error);
+        showToast('Erro ao fazer logout');
+      }
+    }
+    
+    function updateLoanCalculation(amount) {
+      loanAmount = parseInt(amount);
+      const total = loanAmount * 2;
+      
+      document.getElementById('loan-amount-display').textContent = formatPrice(loanAmount);
+      document.getElementById('loan-total').textContent = formatPrice(total);
+      document.getElementById('installment-1').textContent = formatPrice(total);
+      document.getElementById('installment-2').textContent = formatPrice(total / 2);
+      document.getElementById('installment-4').textContent = formatPrice(total / 4);
+      
+      // Salva no localStorage
+      saveToLocalStorage('loanAmount', loanAmount);
+    }
+    
+    function addLoanToCart() {
+      const total = loanAmount * 2;
+      
+      cart.push({
+        id: 'loan-' + Date.now(),
+        name: 'Empréstimo',
+        type: 'loan',
+        loanAmount: loanAmount,
+        price: total,
+        quantity: 1,
+        description: `Valor: R$ ${loanAmount.toFixed(2).replace('.', ',')} | A pagar: R$ ${total.toFixed(2).replace('.', ',')}`
+      });
+      
+      updateCart();
+      
+      if (!document.getElementById('cart-sidebar').classList.contains('open')) {
+        toggleCart();
+      }
+      
+      showToast('Empréstimo adicionado ao carrinho!');
+    }
+    
+    function addUnlockToCart(model, price) {
+      cart.push({
+        id: 'unlock-' + Date.now(),
+        name: `Desbloqueio ${model}`,
+        type: 'unlock',
+        model: model,
+        price: price,
+        quantity: 1
+      });
+      
+      updateCart();
+      
+      if (!document.getElementById('cart-sidebar').classList.contains('open')) {
+        toggleCart();
+      }
+      
+      showToast(`${model} adicionado ao carrinho!`);
+    }
+    
+    function switchTab(tabName) {
+      currentTab = tabName;
+      
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`.tab-button[data-tab="${tabName}"]`)?.classList.add('active');
+      
+      document.querySelector('main').scrollTo(0, 0);
+    }
+    
+    function toggleTheme() {
+      isDark = !isDark;
+      document.documentElement.classList.toggle('dark', isDark);
+      document.getElementById('sun-icon').classList.toggle('hidden', !isDark);
+      document.getElementById('moon-icon').classList.toggle('hidden', isDark);
+      saveToLocalStorage('theme', isDark ? 'dark' : 'light');
+    }
+    
+    function toggleCart() {
+      document.getElementById('cart-sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('open');
+    }
+    
+    function toggleMobileMenu() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    }
+    
+    function formatPrice(price) {
+      return `R$ ${price.toFixed(2).replace('.', ',')}`;
+    }
+    
+    function addToCart(productId, size = null) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      
+      openOptionsModal(productId);
+    }
+    
+    function openOptionsModal(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      
+      selectedProduct = product;
+      selectedSize = product.sizes.length > 0 ? null : 'N/A';
+      selectedColor = null;
+      
+      document.getElementById('modal-product-name').textContent = product.name;
+      document.getElementById('modal-price').textContent = formatPrice(product.price);
+      
+      const productImage = document.getElementById('product-image');
+      const productPlaceholder = document.getElementById('product-placeholder');
+      
+      if (product.imagePrefix) {
+        productImage.src = `roup/${product.imagePrefix}.png`;
+        productImage.style.display = 'block';
+        productPlaceholder.style.display = 'none';
+      } else {
+        productImage.style.display = 'none';
+        productImage.src = '';
+        productPlaceholder.style.display = 'flex';
+      }
+      
+      const sizeSection = document.getElementById('size-section');
+      if (product.sizes.length > 0) {
+        sizeSection.classList.remove('hidden');
+        const sizeOptions = document.getElementById('size-options');
+        sizeOptions.innerHTML = product.sizes.map(size => `
+          <button onclick="selectSize('${size}')" 
+            class="size-option border-2 border-accent/30 py-3 font-medium hover:bg-accent hover:text-primary transition-colors"
+            style="color: var(--text-primary);"
+            data-size="${size}">
+            ${size}
+          </button>
+        `).join('');
+      } else {
+        sizeSection.classList.add('hidden');
+      }
+      
+      const colorOptions = document.getElementById('color-options');
+      colorOptions.innerHTML = product.colors.map(color => `
+        <button onclick="selectColor('${color}')" 
+          class="color-option border-2 border-accent/30 py-3 px-2 text-sm font-medium hover:bg-accent hover:text-primary transition-colors"
+          style="color: var(--text-primary);"
+          data-color="${color}">
+          ${color}
+        </button>
+      `).join('');
+      
+      document.getElementById('options-modal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeOptionsModal() {
+      document.getElementById('options-modal').classList.remove('open');
+      document.body.style.overflow = 'auto';
+      selectedProduct = null;
+      selectedSize = null;
+      selectedColor = null;
+    }
+    
+    function closeOverlays() {
+      if (document.getElementById('options-modal').classList.contains('open')) {
+        closeOptionsModal();
+      } else if (document.getElementById('cart-sidebar').classList.contains('open')) {
+        toggleCart();
+      }
+    }
+    
+    function selectSize(size) {
+      selectedSize = size;
+      
+      document.querySelectorAll('.size-option').forEach(btn => {
+        if (btn.dataset.size === size) {
+          btn.style.background = 'var(--accent)';
+          btn.style.color = 'var(--bg-primary)';
+          btn.style.borderColor = 'var(--accent)';
+        } else {
+          btn.style.background = 'transparent';
+          btn.style.color = 'var(--text-primary)';
+          btn.style.borderColor = 'var(--accent)';
+          btn.style.borderOpacity = '0.3';
+        }
+      });
+    }
+    
+    function selectColor(color) {
+      selectedColor = color;
+      
+      document.querySelectorAll('.color-option').forEach(btn => {
+        if (btn.dataset.color === color) {
+          btn.style.background = 'var(--accent)';
+          btn.style.color = 'var(--bg-primary)';
+          btn.style.borderColor = 'var(--accent)';
+        } else {
+          btn.style.background = 'transparent';
+          btn.style.color = 'var(--text-primary)';
+          btn.style.borderColor = 'var(--accent)';
+          btn.style.borderOpacity = '0.3';
+        }
+      });
+      
+      updateProductImage();
+    }
+    
+    function updateProductImage() {
+      if (!selectedProduct || !selectedProduct.imagePrefix) return;
+      
+      const productImage = document.getElementById('product-image');
+      const productPlaceholder = document.getElementById('product-placeholder');
+      
+      let imagePath;
+      
+      if (selectedColor) {
+        const colorFormatted = selectedColor.toLowerCase();
+        imagePath = `roup/${selectedProduct.imagePrefix}-${colorFormatted}.png`;
+      } else {
+        imagePath = `roup/${selectedProduct.imagePrefix}.png`;
+      }
+      
+      productImage.src = imagePath;
+      productImage.style.display = 'block';
+      productPlaceholder.style.display = 'none';
+    }
+    
+    function confirmAddToCart() {
+      if (!selectedProduct) return;
+      
+      if (selectedProduct.sizes.length > 0 && !selectedSize) {
+        const sizeSection = document.getElementById('size-section');
+        const existingMsg = sizeSection.querySelector('.error-msg');
+        if (!existingMsg) {
+          const errorMsg = document.createElement('p');
+          errorMsg.className = 'error-msg text-red-500 text-sm mt-2';
+          errorMsg.textContent = 'Por favor, selecione um tamanho';
+          sizeSection.appendChild(errorMsg);
+          setTimeout(() => errorMsg.remove(), 3000);
+        }
+        return;
+      }
+      
+      if (!selectedColor) {
+        const colorSection = document.getElementById('color-options').parentElement;
+        const existingMsg = colorSection.querySelector('.error-msg');
+        if (!existingMsg) {
+          const errorMsg = document.createElement('p');
+          errorMsg.className = 'error-msg text-red-500 text-sm mt-2';
+          errorMsg.textContent = 'Por favor, selecione uma cor';
+          colorSection.appendChild(errorMsg);
+          setTimeout(() => errorMsg.remove(), 3000);
+        }
+        return;
+      }
+      
+      const cartItem = cart.find(item => 
+        item.id === selectedProduct.id && 
+        item.size === selectedSize && 
+        item.color === selectedColor
+      );
+      
+      if (cartItem) {
+        cartItem.quantity++;
+      } else {
+        cart.push({ 
+          ...selectedProduct, 
+          size: selectedSize, 
+          color: selectedColor,
+          quantity: 1 
+        });
+      }
+      
+      updateCart();
+      closeOptionsModal();
+      
+      if (!document.getElementById('cart-sidebar').classList.contains('open')) {
+        toggleCart();
+      }
+    }
+    
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+    
+    function updateCart() {
+      const cartItems = document.getElementById('cart-items');
+      const cartCount = document.getElementById('cart-count');
+      const cartTotal = document.getElementById('cart-total');
+      
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      
+      cartCount.textContent = totalItems;
+      cartTotal.textContent = formatPrice(totalPrice);
+      
+      // Salva carrinho no localStorage
+      saveToLocalStorage('cart', cart);
+      
+      if (cart.length === 0) {
+        cartItems.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-full text-center text-secondary">
+            <svg class="w-16 h-16 mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            <p>Seu carrinho está vazio</p>
+          </div>
+        `;
+        return;
+      }
+      
+      cartItems.innerHTML = cart.map((item, index) => `
+        <div class="flex gap-4 p-4 bg-primary rounded-lg">
+          <div class="w-20 h-20 bg-secondary rounded flex items-center justify-center">
+            <svg class="w-8 h-8 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              ${item.type === 'loan' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>' :
+                item.type === 'unlock' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>' :
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>'}
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-medium text-sm">${item.name}</h3>
+            ${item.type === 'product' && item.size && item.size !== 'N/A' ? `<p class="text-secondary text-xs">Tamanho: ${item.size}</p>` : ''}
+            ${item.type === 'product' && item.color ? `<p class="text-secondary text-xs">Cor: ${item.color}</p>` : ''}
+            ${item.type === 'loan' ? `<p class="text-secondary text-xs">${item.description}</p>` : ''}
+            ${item.type !== 'loan' ? `<p class="text-secondary text-xs">Qtd: ${item.quantity}</p>` : ''}
+            <p class="font-bebas text-lg mt-1">${formatPrice(item.price * item.quantity)}</p>
+          </div>
+          <button onclick="removeFromCart(${index})" class="self-start p-1 hover:opacity-70 transition-opacity">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+    
+    function filterProducts(category) {
+      currentFilter = category;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const isActive = btn.dataset.filter === category;
+        btn.style.background = isActive ? 'var(--accent)' : 'transparent';
+        btn.style.color = isActive ? 'var(--bg-primary)' : 'var(--text-primary)';
+      });
+      saveToLocalStorage('currentFilter', category);
+      renderProducts();
+    }
+    
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      const filtered = products.filter(p => p.category === currentFilter);
+      
+      grid.innerHTML = filtered.map(product => `
+        <div class="product-card bg-secondary rounded-lg overflow-hidden">
+          <div class="aspect-square bg-primary flex items-center justify-center relative group overflow-hidden">
+            ${product.imagePrefix ? `
+              <img src="roup/${product.imagePrefix}.png" alt="${product.name}" loading="lazy" 
+                class="w-full h-full object-cover"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <svg class="w-16 h-16 opacity-20 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+            ` : `
+              <svg class="w-16 h-16 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                ${product.category === 'party' 
+                  ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>'
+                  : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>'}
+              </svg>
+            `}
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all flex items-center justify-center">
+              <button onclick="addToCart(${product.id})" 
+                class="opacity-0 group-hover:opacity-100 transition-opacity bg-accent px-4 py-2 text-sm font-medium"
+                style="background: var(--accent); color: var(--bg-primary);">
+                + ADICIONAR
+              </button>
+            </div>
+          </div>
+          <div class="p-4">
+            <span class="text-xs text-secondary uppercase tracking-wider">${
+              product.category === 'summer' ? 'Kit Verão' : 
+              product.category === 'winter' ? 'Kit Inverno' : 
+              'Kit Fervo'
+            }</span>
+            <h3 class="font-medium mt-1">${product.name}</h3>
+            ${product.sizes.length ? `
+              <div class="flex gap-2 mt-2">
+                ${product.sizes.map(s => `<span class="text-xs text-secondary border border-accent/20 px-2 py-1">${s}</span>`).join('')}
+              </div>
+            ` : ''}
+            <p class="font-bebas text-xl mt-2">${formatPrice(product.price)}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    async function finalizarCompraWhatsApp() {
+      if (cart.length === 0) {
+        showToast('Adicione produtos ao carrinho primeiro!');
+        return;
+      }
+      
+      let message = '🛍️ *Olá! Gostaria de finalizar meu pedido:*\n\n';
+      
+      if (currentUser) {
+        message += `👤 *Cliente:* ${currentUser.name}\n`;
+        message += `📱 *Telefone:* ${currentUser.phone}\n`;
+        message += `📧 *Email:* ${currentUser.email}\n`;
+        if (currentUser.address) {
+          message += `📍 *Endereço:* ${currentUser.address}, ${currentUser.city} - ${currentUser.state}, ${currentUser.zipCode}\n`;
+        }
+        message += `⭐ *Pontos de Fidelidade:* ${currentUser.loyaltyPoints}\n\n`;
+      }
+      
+      message += '*ITENS DO PEDIDO:*\n\n';
+      
+      cart.forEach((item, index) => {
+        if (item.type === 'loan') {
+          message += `*${index + 1}. 💰 EMPRÉSTIMO*\n`;
+          message += `   Valor solicitado: R$ ${item.loanAmount.toFixed(2).replace('.', ',')}\n`;
+          message += `   Valor a pagar (com juros): R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
+          message += `   Taxa de juros: 100%\n\n`;
+        } else if (item.type === 'unlock') {
+          message += `*${index + 1}. 🔓 DESBLOQUEIO*\n`;
+          message += `   Aparelho: ${item.model}\n`;
+          if (item.price > 0) {
+            message += `   Preço: R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
+          } else {
+            message += `   Preço: A consultar\n`;
+          }
+          message += `\n`;
+        } else {
+          message += `*${index + 1}. ${item.name}*\n`;
+          if (item.size && item.size !== 'N/A') {
+            message += `   Tamanho: ${item.size}\n`;
+          }
+          if (item.color) {
+            message += `   Cor: ${item.color}\n`;
+          }
+          message += `   Quantidade: ${item.quantity}\n`;
+          message += `   Preço: R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}\n\n`;
+        }
+      });
+      
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      message += `��� *Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
+      
+      // Atualizar pontos e salvar compras no Firebase
+      if (currentUser && window.firebaseDb && window.firebaseModules) {
+        const pointsToAdd = Math.floor(total / 10);
+        const newTotalSpent = (currentUser.totalSpent || 0) + total;
+        const newPoints = (currentUser.loyaltyPoints || 0) + pointsToAdd;
+        
+        try {
+          const { doc, updateDoc, collection, addDoc, serverTimestamp } = window.firebaseModules;
+          const userRef = doc(window.firebaseDb, 'users', currentUser.id);
+          
+          await updateDoc(userRef, {
+            loyaltyPoints: newPoints,
+            totalSpent: newTotalSpent
+          });
+          
+          // Salvar cada compra no histórico
+          for (const item of cart) {
+            if (item.type === 'product') {
+              await addDoc(collection(window.firebaseDb, 'purchases'), {
+                uid: currentUser.uid,
+                productName: `${item.name} - ${item.color}${item.size && item.size !== 'N/A' ? ` (${item.size})` : ''}`,
+                price: item.price * item.quantity,
+                purchaseDate: serverTimestamp()
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao salvar compra:', error);
+        }
+      }
+      
+      const phoneNumber = '5545999299360';
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      
+      cart = [];
+      updateCart();
+      toggleCart();
+    }
+    
+    async function onConfigChange(newConfig) {
+      const customFont = newConfig.font_family || defaultConfig.font_family;
+      const baseSize = newConfig.font_size || defaultConfig.font_size;
+      const baseFontStack = 'sans-serif';
+      
+      document.querySelectorAll('.graffiti-logo').forEach(el => {
+        el.textContent = newConfig.store_name || defaultConfig.store_name;
+        el.setAttribute('data-text', newConfig.store_name || defaultConfig.store_name);
+      });
+      
+      const tabShopBtn = document.getElementById('tab-shop-btn');
+      if (tabShopBtn) tabShopBtn.textContent = newConfig.tab_shop || defaultConfig.tab_shop;
+      
+      const tabUnlockBtn = document.getElementById('tab-unlock-btn');
+      if (tabUnlockBtn) tabUnlockBtn.textContent = newConfig.tab_unlock || defaultConfig.tab_unlock;
+      
+      const tabAboutBtn = document.getElementById('tab-about-btn');
+      if (tabAboutBtn) tabAboutBtn.textContent = newConfig.tab_about || defaultConfig.tab_about;
+      
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      document.body.style.fontSize = `${baseSize}px`;
+    }
+    
+    // Função de inicialização
+    function initApp() {
+      renderProducts();
+      updateCart();
+      initFirebaseAuth();
+      
+      // Aplica tema salvo
+      document.documentElement.classList.toggle('dark', isDark);
+      document.getElementById('sun-icon').classList.toggle('hidden', !isDark);
+      document.getElementById('moon-icon').classList.toggle('hidden', isDark);
+      
+      // Aplica filtro salvo
+      if (currentFilter) {
+        filterProducts(currentFilter);
+      }
+      
+      // Atualiza slider de empréstimo se houver valor salvo
+      if (loanAmount) {
+        document.getElementById('loan-slider').value = loanAmount;
+        updateLoanCalculation(loanAmount);
+      }
+      
+      // Atualiza interface do usuário se houver sessão
+      if (currentUser) {
+        updateUserInterface();
+      }
+    }
+    
+    // Inicializa quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c0d06795396f1e6',t:'MTc2ODg5NTg5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>
+// --- BOOTSTRAP AUTH ---
+// Garante que o listener do Firebase Auth seja iniciado e a UI só reaja depois disso.
+(function startAuthListener(){
+  function start(){
+    if (typeof initFirebaseAuth === 'function') {
+      initFirebaseAuth();
+    } else {
+      setTimeout(start, 100);
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+
+function openProfile() {
+  openProfile();
+  // força atualizar UI
+  if (typeof updateUserInterface === 'function') updateUserInterface();
+  if (typeof loadMyOrders === 'function' && window.currentUser) {
+    try { loadMyOrders(); } catch(e) {}
+  }
+}
+
+</script>
+
+</body>
+</html>
