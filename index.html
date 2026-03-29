@@ -534,7 +534,7 @@
         const uptimeResponse = await fetch('https://decapi.me/twitch/uptime?channel=lcvitinhoo');
         const uptimeText = await uptimeResponse.text();
         
-        const isLive = !uptimeText.toLowerCase().includes('offline') && uptimeText.trim() !== '';
+        const isLive = uptimeText && !uptimeText.toLowerCase().includes('offline');
         
         if (isLive) {
           // Buscar informações adicionais quando estiver online
