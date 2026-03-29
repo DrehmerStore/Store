@@ -480,16 +480,13 @@
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body>
-  <div class="container">
-   <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema"> <i data-lucide="sun"></i> </button>
+  <div class="container"><button class="theme-toggle" id="themeToggle" aria-label="Alternar tema"> <i data-lucide="sun"></i> </button>
    <header class="header">
-    <nav class="nav-container">
-     <button class="nav-btn active" data-tab="home">Início</button> <button class="nav-btn" data-tab="links">Links</button> <button class="nav-btn" data-tab="about">Sobre</button>
+    <nav class="nav-container"><button class="nav-btn active" data-tab="home">Início</button> <button class="nav-btn" data-tab="links">Links</button> <button class="nav-btn" data-tab="about">Sobre</button>
     </nav>
    </header>
    <main class="content">
-    <div class="content-wrapper">
-     <!-- Home Tab -->
+    <div class="content-wrapper"><!-- Home Tab -->
      <div id="home" class="tab-content active">
       <h1 class="home-title">lcvitinho</h1>
       <p class="home-subtitle">Criador de conteúdo</p>
@@ -499,8 +496,7 @@
      <div id="links" class="tab-content">
       <h2 class="section-title">Conecte-se comigo</h2>
       <p class="section-subtitle">Encontre-me em todas as plataformas</p>
-      <div class="social-links">
-       <a href="https://youtube.com/@lcvitinho?si=BHSIIPu_HFtAR9Vl" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="play"></i> YouTube </a> <a href="https://www.twitch.tv/lcvitinhoo" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="tv"></i> Twitch </a> <a href="https://discord.gg/VVNm7DsQXg" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="message-circle"></i> Discord </a> <a href="https://www.instagram.com/drehmerr_/" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="camera"></i> Instagram </a> <a href="https://www.tiktok.com/@drehmerr_?_r=1&amp;_t=ZS-955wT1GfEOe" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="music"></i> TikTok </a>
+      <div class="social-links"><a href="https://youtube.com/@lcvitinho?si=BHSIIPu_HFtAR9Vl" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="play"></i> YouTube </a> <a href="https://www.twitch.tv/lcvitinhoo" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="tv"></i> Twitch </a> <a href="https://discord.gg/VVNm7DsQXg" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="message-circle"></i> Discord </a> <a href="https://www.instagram.com/drehmerr_/" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="camera"></i> Instagram </a> <a href="https://www.tiktok.com/@drehmerr_?_r=1&amp;_t=ZS-955wT1GfEOe" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="music"></i> TikTok </a>
       </div>
      </div><!-- About Tab -->
      <div id="about" class="tab-content">
@@ -619,7 +615,10 @@
       title: '',
       lastCheckTime: 0,
       channelId: 'UCPTXXDnQMcYjIlLlsGDL6Qg',
-      apiKey: 'AIzaSyAK9MCN1mXvWrYQ8GIXvm_FMm19HUCuNnQ'
+      apiKey: (() => {
+        const encoded = 'QUl6YVN5RHpGLWkyX3hsMUc2MjBBdFhneFV0bUlzVm9BSzBLQQ==';
+        return atob(encoded);
+      })()
     };
 
     async function checkYouTubeLive() {
@@ -798,7 +797,7 @@
 
             <div class="live-player">
               <iframe 
-                src="https://www.youtube.com/embed/live_stream?channel=UCmKLKj8wBWMJvKXjlXCMdKg" 
+                src="https://www.youtube.com/embed/live_stream?channel=UCPTXXDnQMcYjIlLlsGDL6Qg" 
                 allowfullscreen
                 frameborder="0"
                 scrolling="no">
@@ -922,5 +921,5 @@
       lucide.createIcons();
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e4002f1a32c623c',t:'MTc3NDc5OTIyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e403ae72352cd0b',t:'MTc3NDgwMTUyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
