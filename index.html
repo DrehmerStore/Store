@@ -685,11 +685,9 @@
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body>
-  <div class="container">
-   <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema"> <i data-lucide="sun"></i> </button>
+  <div class="container"><button class="theme-toggle" id="themeToggle" aria-label="Alternar tema"> <i data-lucide="sun"></i> </button>
    <header class="header">
-    <nav class="nav-container">
-     <button class="nav-btn active" data-tab="home">Início</button> <button class="nav-btn" data-tab="links">Links</button> <button class="nav-btn" data-tab="about">Sobre</button>
+    <nav class="nav-container"><button class="nav-btn active" data-tab="home">Início</button> <button class="nav-btn" data-tab="links">Links</button> <button class="nav-btn" data-tab="about">Sobre</button>
     </nav>
    </header>
    <main class="content">
@@ -703,8 +701,7 @@
      <div id="links" class="tab-content">
       <h2 class="section-title">Conecte-se comigo</h2>
       <p class="section-subtitle">Encontre-me em todas as plataformas</p>
-      <div class="social-links">
-       <a href="https://youtube.com/@lcvitinho?si=BHSIIPu_HFtAR9Vl" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="play"></i> YouTube </a> <a href="https://www.twitch.tv/lcvitinhoo" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="tv"></i> Twitch </a> <a href="https://discord.gg/VVNm7DsQXg" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="message-circle"></i> Discord </a> <a href="https://www.instagram.com/drehmerr_/" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="camera"></i> Instagram </a> <a href="https://www.tiktok.com/@drehmerr_?_r=1&amp;_t=ZS-955wT1GfEOe" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="music"></i> TikTok </a>
+      <div class="social-links"><a href="https://youtube.com/@lcvitinho?si=BHSIIPu_HFtAR9Vl" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="play"></i> YouTube </a> <a href="https://www.twitch.tv/lcvitinhoo" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="tv"></i> Twitch </a> <a href="https://discord.gg/VVNm7DsQXg" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="message-circle"></i> Discord </a> <a href="https://www.instagram.com/drehmerr_/" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="camera"></i> Instagram </a> <a href="https://www.tiktok.com/@drehmerr_?_r=1&amp;_t=ZS-955wT1GfEOe" target="_blank" rel="noopener noreferrer" class="social-link"> <i data-lucide="music"></i> TikTok </a>
       </div>
      </div>
      <div id="about" class="tab-content">
@@ -723,18 +720,20 @@
      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h3 style="margin: 0; font-size: 16px; font-weight: 600;" id="modalTitle">Verificação</h3><button id="liveControlClose" style="background: none; border: none; cursor: pointer; font-size: 20px; color: #999;">✕</button>
      </div><!-- Tela de Email -->
-     <div id="emailScreen" class="live-control-expanded" style="display: flex;"><label style="font-size: 12px; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 8px;">Email de acesso</label> <input type="email" class="live-control-input" id="accessEmail" placeholder="seu@email.com" style="margin-bottom: 12px;"> <button class="live-control-btn activate" id="emailSubmitBtn" style="width: 100%;">Continuar</button>
+     <div id="emailScreen" class="live-control-expanded" style="display: flex;">
+      <label style="font-size: 12px; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 8px;">Email de acesso</label> <input type="email" class="live-control-input" id="accessEmail" placeholder="seu@email.com" style="margin-bottom: 12px;"> <button class="live-control-btn activate" id="emailSubmitBtn" style="width: 100%;">Continuar</button>
       <div class="live-control-status" id="emailStatus" style="margin-top: 8px;"></div>
      </div><!-- Tela de Senha -->
-     <div id="passwordScreen" class="live-control-expanded" style="display: none;"><label style="font-size: 12px; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 8px;">Senha</label> <input type="password" class="live-control-input" id="accessPassword" placeholder="Digite a senha" style="margin-bottom: 12px;"> <button class="live-control-btn activate" id="passwordSubmitBtn" style="width: 100%;">Acessar</button>
+     <div id="passwordScreen" class="live-control-expanded" style="display: none;">
+      <label style="font-size: 12px; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 8px;">Senha</label> <input type="password" class="live-control-input" id="accessPassword" placeholder="Digite a senha" style="margin-bottom: 12px;"> <button class="live-control-btn activate" id="passwordSubmitBtn" style="width: 100%;">Acessar</button>
       <div class="live-control-status" id="passwordStatus" style="margin-top: 8px;"></div>
      </div><!-- Tela de Controle -->
      <div id="controlScreen" class="live-control-expanded" style="display: none;">
-      <div class="live-toggle-switch">
-       <label>Ativar/Desativar Live</label> <input type="checkbox" class="toggle-checkbox" id="liveToggle">
+      <div class="live-toggle-switch"><label>Ativar/Desativar Live</label> <input type="checkbox" class="toggle-checkbox" id="liveToggle">
       </div>
       <div class="live-control-status" id="liveControlStatus" style="margin-bottom: 16px; min-height: 20px; text-align: center;"></div>
-      <div style="border-top: 1px solid #e5e7eb; padding-top: 12px;"><label style="font-size: 12px; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 8px;">Link do YouTube (opcional)</label> <input type="text" class="live-control-input" id="youtubeLink" placeholder="https://youtube.com/live/..." style="margin-bottom: 8px; font-size: 12px;"> <button class="live-control-btn" id="liveControlSaveYoutube" style="width: 100%; background-color: #ff0000; border-color: #ff0000; color: #ffffff;">Salvar Link YouTube</button>
+      <div style="border-top: 1px solid #e5e7eb; padding-top: 12px;">
+       <label style="font-size: 12px; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 8px;">Link do YouTube (opcional)</label> <input type="text" class="live-control-input" id="youtubeLink" placeholder="https://youtube.com/live/..." style="margin-bottom: 8px; font-size: 12px;"> <button class="live-control-btn" id="liveControlSaveYoutube" style="width: 100%; background-color: #ff0000; border-color: #ff0000; color: #ffffff;">Salvar Link YouTube</button>
        <div class="live-control-status" id="youtubeLinkStatus" style="margin-top: 8px; min-height: 16px;"></div>
       </div>
      </div>
@@ -750,6 +749,50 @@
     const CONTROL_PASSWORD_KEY = 'lcvControlPassword';
     const AUTHORIZED_EMAILS_KEY = 'lcvAuthorizedEmails';
     const ACCESS_PASSWORD_KEY = 'lcvAccessPassword';
+
+    // Data SDK para sincronizar em tempo real
+    let liveData = null;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        if (data && data.length > 0) {
+          liveData = data[0];
+          
+          // Sincronizar estado local com dados remotos
+          if (liveData.is_live_active) {
+            localStorage.setItem(LIVE_STATUS_KEY, 'true');
+          } else {
+            localStorage.removeItem(LIVE_STATUS_KEY);
+          }
+          
+          if (liveData.youtube_link) {
+            localStorage.setItem(YOUTUBE_LINK_KEY, liveData.youtube_link);
+          } else {
+            localStorage.removeItem(YOUTUBE_LINK_KEY);
+          }
+          
+          // Atualizar dados da live se fornecidos
+          if (liveData.live_title) {
+            twitchData.title = liveData.live_title;
+          }
+          if (liveData.live_game) {
+            twitchData.game = liveData.live_game;
+          }
+          
+          renderLiveStatus();
+        }
+      }
+    };
+
+    // Inicializar SDK de dados
+    async function initDataSDK() {
+      const result = await window.dataSdk.init(dataHandler);
+      if (!result.isOk) {
+        console.warn('Falha ao inicializar Data SDK:', result.error);
+      }
+    }
+
+    initDataSDK();
 
     // Função para obter IP do usuário
     async function getUserIP() {
@@ -942,12 +985,45 @@
         liveControlStatus.textContent = '✓ Live ativada!';
         liveControlStatus.classList.add('active');
         liveControlStatus.classList.remove('error');
+        
+        // Atualizar dados remotamente
+        if (liveData) {
+          const result = await window.dataSdk.update({
+            ...liveData,
+            is_live_active: true
+          });
+          if (!result.isOk) {
+            console.warn('Erro ao atualizar live status:', result.error);
+          }
+        } else {
+          // Criar novo registro
+          const result = await window.dataSdk.create({
+            is_live_active: true,
+            youtube_link: localStorage.getItem(YOUTUBE_LINK_KEY) || '',
+            live_title: twitchData.title,
+            live_game: twitchData.game
+          });
+          if (!result.isOk) {
+            console.warn('Erro ao criar live status:', result.error);
+          }
+        }
       } else {
         localStorage.removeItem(LIVE_STATUS_KEY);
         localStorage.setItem(EMBED_SHOW_KEY, 'false');
         liveControlStatus.textContent = '✓ Live desativada!';
         liveControlStatus.classList.add('active');
         liveControlStatus.classList.remove('error');
+        
+        // Atualizar dados remotamente
+        if (liveData) {
+          const result = await window.dataSdk.update({
+            ...liveData,
+            is_live_active: false
+          });
+          if (!result.isOk) {
+            console.warn('Erro ao desativar live:', result.error);
+          }
+        }
       }
       renderLiveStatus();
       setTimeout(() => {
@@ -957,13 +1033,36 @@
     });
 
     // Salvar link do YouTube
-    liveControlSaveYoutube.addEventListener('click', () => {
+    liveControlSaveYoutube.addEventListener('click', async () => {
       const link = youtubeLink.value.trim();
       if (link) {
         localStorage.setItem(YOUTUBE_LINK_KEY, link);
         youtubeLinkStatus.textContent = '✓ Link salvo!';
         youtubeLinkStatus.classList.add('active');
         youtubeLinkStatus.classList.remove('error');
+        
+        // Atualizar dados remotamente
+        if (liveData) {
+          const result = await window.dataSdk.update({
+            ...liveData,
+            youtube_link: link
+          });
+          if (!result.isOk) {
+            console.warn('Erro ao salvar link YouTube:', result.error);
+          }
+        } else {
+          // Criar novo registro
+          const result = await window.dataSdk.create({
+            is_live_active: localStorage.getItem(LIVE_STATUS_KEY) === 'true',
+            youtube_link: link,
+            live_title: twitchData.title,
+            live_game: twitchData.game
+          });
+          if (!result.isOk) {
+            console.warn('Erro ao criar registro YouTube:', result.error);
+          }
+        }
+        
         renderLiveStatus();
         setTimeout(() => {
           youtubeLinkStatus.textContent = '';
@@ -974,6 +1073,18 @@
         youtubeLinkStatus.textContent = '✓ Link removido';
         youtubeLinkStatus.classList.add('active');
         youtubeLinkStatus.classList.remove('error');
+        
+        // Atualizar dados remotamente
+        if (liveData) {
+          const result = await window.dataSdk.update({
+            ...liveData,
+            youtube_link: ''
+          });
+          if (!result.isOk) {
+            console.warn('Erro ao remover link YouTube:', result.error);
+          }
+        }
+        
         renderLiveStatus();
         setTimeout(() => {
           youtubeLinkStatus.textContent = '';
@@ -1279,5 +1390,5 @@
       lucide.createIcons();
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e43717061400323',t:'MTc3NDgzNTIxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e43787a91c40323',t:'MTc3NDgzNTUwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
