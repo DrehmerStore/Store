@@ -830,6 +830,18 @@
       lastUpdateTime: 0
     };
 
+    function setManualLiveState(isActive) {
+      if (isActive) {
+        localStorage.setItem(LIVE_STATUS_KEY, 'true');
+        localStorage.setItem(EMBED_SHOW_KEY, 'true');
+      } else {
+        localStorage.removeItem(LIVE_STATUS_KEY);
+        localStorage.setItem(EMBED_SHOW_KEY, 'false');
+      }
+      liveToggle.checked = isActive;
+      renderLiveStatus();
+    }
+
     function syncLocalStateFromFirebase(data = {}) {
       const isLiveActive = !!data.is_live_active;
       const embedShow = data.embed_show !== false && isLiveActive;
@@ -870,6 +882,7 @@
 
       db.ref('live').on('value', (snapshot) => {
         const data = snapshot.val() || {};
+        console.log('Firebase live data:', data);
         syncLocalStateFromFirebase(data);
         renderLiveStatus();
       }, (error) => {
@@ -1021,25 +1034,22 @@
     liveToggle.addEventListener('change', async () => {
       const isActive = liveToggle.checked;
 
+      setManualLiveState(isActive);
+      showTemporaryStatus(
+        liveControlStatus,
+        isActive ? '✓ Live ativada!' : '✓ Live desativada!',
+        'active'
+      );
+
       try {
         if (firebaseReady && db) {
           await db.ref('live').update({
             is_live_active: isActive,
             embed_show: isActive
           });
-        }
-
-        if (isActive) {
-          localStorage.setItem(LIVE_STATUS_KEY, 'true');
-          localStorage.setItem(EMBED_SHOW_KEY, 'true');
-          showTemporaryStatus(liveControlStatus, '✓ Live ativada!', 'active');
         } else {
-          localStorage.removeItem(LIVE_STATUS_KEY);
-          localStorage.setItem(EMBED_SHOW_KEY, 'false');
-          showTemporaryStatus(liveControlStatus, '✓ Live desativada!', 'active');
+          console.warn('Firebase indisponível: mudança salva só neste navegador.');
         }
-
-        renderLiveStatus();
       } catch (error) {
         console.error(error);
         showTemporaryStatus(liveControlStatus, '❌ Erro ao salvar no Firebase', 'error');
